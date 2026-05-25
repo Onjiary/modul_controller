@@ -17,7 +17,7 @@ Every module developer knows the challenge: creating individual modules is strai
 
 
 
-Installation & Integration Guide
+## Installation & Integration Guide
 
 This guide explains how to integrate the Mod Controller into your AzerothCore server and how to connect your own modules to the system.
 
