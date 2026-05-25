@@ -1,0 +1,11 @@
+# mod_controller/CMakeLists.txt
+
+set(mod_controller_SOURCES
+    src/Controller.cpp
+    src/mod_controller_loader.cpp
+)
+
+add_library(mod_controller STATIC ${mod_controller_SOURCES})
+
+# Wichtig: Linke wie beim Guildsystem gegen die Core-Komponenten
+target_link_libraries(mod_controller PUBLIC authserver shared worldserver)
