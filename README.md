@@ -57,6 +57,30 @@ The system includes a PostmanExaminer to prevent unauthorized event dispatching.
 // The Examiner automatically triggers upon Postman calls
 sController->PostmanExaminer(senderId, eventId);
 
+### Managing Event IDs: `EventConstants.h`
+To keep your module communication organized and avoid "magic numbers," we highly recommend using a shared header file for all your Event and Module IDs.
+
+1. **Create a `EventConstants.h`** in your `mod_controller/src` directory (or a shared include path).
+2. **Define your IDs centrally:**
+   ```cpp
+   enum ModuleIds {
+       MODULE_GUILD_HOUSING = 100,
+       MODULE_ANNOUNCER     = 101
+   };
+
+   enum EventIds {
+       EVENT_GUILD_HOUSING_PURCHASED = 1000,
+       EVENT_SERVER_STARTUP          = 2000
+   };
+
+#include "EventConstants.h"
+
+
+
+
+
+
+
 Recommended Best Practices
 
 Event IDs: Use a shared constant header file (e.g., EventConstants.h) across your modules to prevent ID collisions.
