@@ -1,24 +1,43 @@
-#pragma once
-#include "Common.h"
-#include <map>
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
+
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <functional>
 #include <vector>
-#include "Entities/Object/ObjectGuid.h"
+#include "Define.h" // AzerothCore Basis-Header
 
-class Controller
-{
-public:
-    static Controller* instance() {
-        static Controller instance;
-        return &instance;
-    }
-
-    void Postman(uint32 postsender, uint32 eventId, ObjectGuid targetGuid);
-    void PostmanRecipient(uint32 postrecipient, uint32 runpostrecipient);
-    void PostmanExaminer(uint32 postexaminer, uint32 runpostexaminer);
-
-private:
-    // The "mailbox": EventID -> List of module IDs
-    std::map<uint32, std::vector<uint32>> _subscribers;
+// Struktur für den Datenaustausch
+struct ResultData {
+    uint32 npcId;
+    float posX,posY, posZ;
+    uint32 playerGuidLow; // Benenne es zur Klarheit um
 };
 
-#define sController Controller::instance()
+class Controller {
+private:
+    std::queue<std::function<void()>> _taskQueue;
+    std::queue<ResultData> _resultQueue;
+    std::mutex _queueMutex;
+    std::mutex _resultMutex;
+    std::condition_variable _cv;
+    std::vector<std::thread> _workers;
+    bool _stop = false;
+
+public:
+    Controller();
+    ~Controller();
+
+    void WorkerLoop();
+    void DispatchAsync(std::function<void()> task);
+    void SubmitResult(ResultData res);
+    bool HasResults();
+    ResultData PopResult();
+};
+
+// Globaler Zugriffspunkt (extern deklariert)
+extern Controller* sController;
+
+#endif

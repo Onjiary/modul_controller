@@ -1,85 +1,90 @@
-/* * Controller - Central Communication Hub
- * --------------------------------------
- * Responsible for the Module Postman System.
- * Coordinates inter-module messaging and event dispatching.
+/* * Controller - Central High-Performance Framework
+ * -----------------------------------------------
  */
 
 #include "Controller.h"
-#include "Entities/Object/ObjectGuid.h"
-#include <iostream>
 #include "ScriptMgr.h"
 #include "ScriptObject.h"
+#include "Entities/Object/ObjectGuid.h"
+#include <iostream>
 
- /** * 1. Postman (The Dispatcher)
-  * Receives a packet and distributes it to all modules
-  * that are registered for this specific event.
-  */
-void Controller::Postman(uint32 postsender, uint32 eventId, ObjectGuid targetGuid)
-{
-    // Security check: Is the packet valid?
-    if (targetGuid.IsEmpty())
-    {
-        return;
+ // 1. Globale Instanz
+Controller* sController = new Controller();
+
+// 2. Initialisierung der Worker-Threads
+Controller::Controller() {
+    for (int i = 0; i < 4; ++i) {
+        _workers.emplace_back(&Controller::WorkerLoop, this);
     }
+}
 
-    // Check if any modules are registered for this event
-    auto it = _subscribers.find(eventId);
-    if (it != _subscribers.end())
+// 3. Destruktor zum sauberen Beenden
+Controller::~Controller() {
     {
-        // Iterate through all registered recipient modules
-        for (uint32 recipientId : it->second)
-        {
-            std::cout << "[Postman] Event " << eventId
-                << " from module " << postsender
-                << " delivered to recipient " << recipientId
-                << " (Target: " << targetGuid.GetRawValue() << ")"
-                << std::endl;
+        std::lock_guard<std::mutex> lock(_queueMutex);
+        _stop = true;
+    }
+    _cv.notify_all();
+    for (auto& worker : _workers) {
+        if (worker.joinable()) {
+            worker.join();
         }
     }
 }
 
-/** * 2. PostmanRecipient (The Registrar)
- * A module registers itself to listen for a specific event.
- */
-void Controller::PostmanRecipient(uint32 postrecipient, uint32 runpostrecipient)
-{
-    // Register module ID in the list for this event
-    _subscribers[runpostrecipient].push_back(postrecipient);
+// 4. Worker Loop
+void Controller::WorkerLoop() {
+    while (true) {
+        std::function<void()> task;
+        {
+            std::unique_lock<std::mutex> lock(_queueMutex);
+            _cv.wait(lock, [this] { return _stop || !_taskQueue.empty(); });
 
-    std::cout << "[Recipient] Module " << postrecipient
-        << " registered for event " << runpostrecipient
-        << std::endl;
-}
+            if (_stop && _taskQueue.empty()) return;
 
-/** * 3. PostmanExaminer (The Security Guard)
- * Checks incoming mail for authorization.
- */
-void Controller::PostmanExaminer(uint32 postexaminer, uint32 runpostexaminer)
-{
-    // Implement blacklists or permission checks here.
-    if (postexaminer == 0)
-    {
-        std::cerr << "[Examiner] ERROR: Unknown sender (ID 0)!" << std::endl;
-        return;
+            task = std::move(_taskQueue.front());
+            _taskQueue.pop();
+        }
+        task();
     }
-
-    std::cout << "[Examiner] Event " << runpostexaminer
-        << " from module " << postexaminer
-        << " checked and approved."
-        << std::endl;
 }
 
-// Class to hook the module into the AzerothCore script system
-class MyControllerScript : public ScriptObject {
+// 5. Interface Funktionen
+void Controller::DispatchAsync(std::function<void()> task) {
+    {
+        std::lock_guard<std::mutex> lock(_queueMutex);
+        _taskQueue.push(std::move(task));
+    }
+    _cv.notify_one();
+}
+
+void Controller::SubmitResult(ResultData res) {
+    std::lock_guard<std::mutex> lock(_resultMutex);
+    _resultQueue.push(res);
+}
+
+bool Controller::HasResults() {
+    std::lock_guard<std::mutex> lock(_resultMutex);
+    return !_resultQueue.empty();
+}
+
+ResultData Controller::PopResult() {
+    std::lock_guard<std::mutex> lock(_resultMutex);
+    ResultData res = _resultQueue.front();
+    _resultQueue.pop();
+    return res;
+}
+
+// 6. Registrierung für den AzerothCore-Linker
+class ControllerSystemScript : public ScriptObject
+{
 public:
-    MyControllerScript() : ScriptObject("MyControllerScript") {
-        // Module registration message upon server startup.
-        std::cout << ">>> Hello! The Post-System Controller is active and ready to handle events. <<<" << std::endl;
+    ControllerSystemScript() : ScriptObject("ControllerSystemScript") {
+        std::cout << ">>> Controller-Framework geladen und bereit. <<<" << std::endl;
     }
 };
 
-// Function to initialize the script
 void Addmod_Controller()
 {
-    new MyControllerScript();
+    new ControllerSystemScript();
 }
