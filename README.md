@@ -1,4 +1,4 @@
-#Module Controller (sController)
+Module Controller (sController)
 
 
 ##Overview
