@@ -43,7 +43,7 @@ Clone the Repository:
 Navigate to your AzerothCore modules directory and clone the sController repository:
 
 cd /path/to/azerothcore/modules
-git clone [URL-DEINES-REPOS] sController
+git clone [(https://github.com/Onjiary/modul_controller)] sController
 
 
 2.  **Apply Database Updates:**
