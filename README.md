@@ -1,10 +1,10 @@
 Module Controller (sController)
 
 
-##Overview
+Overview
 The sController is a high-performance, robust backend framework designed for AzerothCore. It serves as a centralized communication hub and task management engine, specifically engineered to handle complex data exchange between various server modules. By providing a stable, low-overhead bridge, it ensures seamless integration and reliable operation of custom server features, even under high-load scenarios.
 
-##Core Capabilities
+Core Capabilities
 High-Throughput Task Processing: Built to handle thousands of concurrent operations efficiently, ensuring that complex background tasks do not interfere with server performance or client-side stability.
 
 Centralized Data Hub: Acts as a master controller for inter-module communication, streamlining data flow and reducing dependency conflicts between disparate components.
@@ -13,10 +13,10 @@ Custom Asset & Environment Support: Optimized for the management of custom game 
 
 Production-Ready Stability: Rigorously tested under load (e.g., handling 4,000+ concurrent tasks), the architecture is designed to minimize latency and prevent synchronization issues in dynamic, module-heavy setups.
 
-##Technical Implementation
+Technical Implementation
 The sController utilizes an efficient threading model that distributes logic processing effectively across available CPU resources. It is designed to work in tandem with custom patch files (e.g., Patch-M.MPQ), enabling developers to deploy sophisticated housing systems, custom building displays, and unique map functionalities without compromising the integrity of the core server environment.
 
-##Use Cases
+Use Cases
 Custom Housing Systems: Managing thousands of player-owned objects and their respective states.
 
 Dynamic Event Controllers: Handling large-scale server events that require synchronized data updates.
