@@ -1,3 +1,5 @@
+![Stresstest Ergebnis](StressTestPicture.png)
+
 ## mod_controller
 A high-performance, multi-threaded task controller for AzerothCore.
 
