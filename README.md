@@ -15,13 +15,26 @@ Configurable Pool: Easily scalable worker threads for custom performance require
 
 ## Stress Test Results
 The module has been successfully tested under extreme conditions (14,000 tasks processed concurrently) without any impact on the main server loop or player latency.
+![Stress Test Results](https://github.com/Onjiary/modul_controller/blob/main/StressTestPicture.png)
+
+
 
 ## Getting Started
 To use the controller, simply dispatch your tasks from anywhere in your module:
 
-## C++
-sController->DispatchAsync([]() {
+``` C++
+ sController->DispatchAsync([]() {
     // Your heavy background logic goes here
 });
+```
 Contributions
 Contributions are welcome! Feel free to open a Pull Request if you have suggestions for improvement.
+
+## Important Considerations
+When using the task queue, please keep in mind that this is a multi-threaded environment. To avoid crashes or data inconsistency, ensure that:
+
+Thread Safety: Do not access or modify game world objects (like Map, GameObject, or Player data) directly from inside the background task.
+
+Data Handling: Use the queue primarily for heavy calculations, database operations, or file I/O that do not require an immediate update to the game state.
+
+Safe Communication: If you need to return results to the main thread, use the engine's built-in callback mechanisms (e.g., sWorld->AddCallback).
