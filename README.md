@@ -1,5 +1,3 @@
-![Stresstest Ergebnis](StressTestPicture.png)
-
 ## mod_controller
 A high-performance, multi-threaded task controller for AzerothCore.
 
@@ -17,13 +15,17 @@ Configurable Pool: Easily scalable worker threads for custom performance require
 
 ## Stress Test Results
 The module has been successfully tested under extreme conditions (14,000 tasks processed concurrently) without any impact on the main server loop or player latency.
+![Stresstest Ergebnis](StressTestPicture.png)
+
+
 
 ## Getting Started
 To use the controller, simply dispatch your tasks from anywhere in your module:
 
-## C++
-sController->DispatchAsync([]() {
+``` C++
+ sController->DispatchAsync([]() {
     // Your heavy background logic goes here
 });
+```
 Contributions
 Contributions are welcome! Feel free to open a Pull Request if you have suggestions for improvement.
