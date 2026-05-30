@@ -84,6 +84,33 @@ public:
     }
 };
 
+
+void Controller::AddMainThreadTask(std::function<void()> task) {
+    std::lock_guard<std::mutex> lock(_mainThreadMutex);
+    _mainThreadTasks.push(std::move(task));
+}
+
+void Controller::UpdateMainThreadTasks() {
+    std::lock_guard<std::mutex> lock(_mainThreadMutex);
+    while (!_mainThreadTasks.empty()) {
+        auto task = std::move(_mainThreadTasks.front());
+        _mainThreadTasks.pop();
+        task();
+    }
+}
+
+
+class ControllerWorldScript : public WorldScript {
+public:
+    ControllerWorldScript() : WorldScript("ControllerWorldScript") {}
+
+    void OnUpdate(uint32 /*diff*/) override {
+        // Hier wird bei jedem Tick des Servers geprüft, ob Aufgaben für den Main-Thread anstehen
+        sController->UpdateMainThreadTasks();
+    }
+};
+
+
 void Addmod_Controller()
 {
     new ControllerSystemScript();

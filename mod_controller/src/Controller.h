@@ -7,13 +7,12 @@
 #include <thread>
 #include <functional>
 #include <vector>
-#include "Define.h" // AzerothCore Basis-Header
+#include "Define.h"
 
-// Struktur für den Datenaustausch
 struct ResultData {
     uint32 npcId;
-    float posX,posY, posZ;
-    uint32 playerGuidLow; // Benenne es zur Klarheit um
+    float posX, posY, posZ;
+    uint32 playerGuidLow;
 };
 
 class Controller {
@@ -26,6 +25,10 @@ private:
     std::vector<std::thread> _workers;
     bool _stop = false;
 
+    // Neue Main-Thread Queue innerhalb der Klasse!
+    std::queue<std::function<void()>> _mainThreadTasks;
+    std::mutex _mainThreadMutex;
+
 public:
     Controller();
     ~Controller();
@@ -35,9 +38,12 @@ public:
     void SubmitResult(ResultData res);
     bool HasResults();
     ResultData PopResult();
+
+    // Neue Methoden innerhalb der Klasse
+    void AddMainThreadTask(std::function<void() > task);
+    void UpdateMainThreadTasks();
 };
 
-// Globaler Zugriffspunkt (extern deklariert)
 extern Controller* sController;
 
-#endif
+#endif // CONTROLLER_H
